@@ -2,7 +2,7 @@ import { ethers, upgrades } from "hardhat";
 
 async function main() {
   const Carbon3TrustLabel = await ethers.getContractFactory("Carbon3TrustLabel");
-  const contract = await upgrades.deployProxy(Carbon3TrustLabel, []);
+  const contract = await upgrades.deployProxy(Carbon3TrustLabel, ["Carbon3TrustLabel", "C3TL"]);
   console.log(`Deployed Carbon3TrustLabel to ${contract.address}`);
 }
 
