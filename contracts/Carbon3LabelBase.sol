@@ -6,6 +6,7 @@ pragma solidity ^0.8.9;
 
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
@@ -20,6 +21,7 @@ import "./interface/ICarbon3Label.sol";
 abstract contract Carbon3LabelBase is
   Initializable,
   ICarbon3Label,
+  PausableUpgradeable,
   ReentrancyGuardUpgradeable,
   AccessControlEnumerableUpgradeable {
   using SafeMathUpgradeable for uint256;
@@ -30,6 +32,7 @@ abstract contract Carbon3LabelBase is
 
   using CountersUpgradeable for CountersUpgradeable.Counter;
 
+  bytes32 public constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
   bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
   uint256 public constant BATCH_SIZE = 1_000_000;
@@ -59,11 +62,25 @@ abstract contract Carbon3LabelBase is
   }
 
   function __Carbon3LabelBase_init_unchained(string memory name_, string memory symbol_) internal onlyInitializing {
+    __Pausable_init();
+
+    _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    _grantRole(PAUSER_ROLE, msg.sender);
+    _grantRole(MINTER_ROLE, msg.sender);
+    
     _name = name_;
     _symbol = symbol_;
   }
 
-  function batchMint(address to, uint256 quantity, string memory batchBaseUri) external onlyRole(MINTER_ROLE) nonReentrant {
+  function pause() public onlyRole(PAUSER_ROLE) {
+    _pause();
+  }
+
+  function unpause() public onlyRole(PAUSER_ROLE) {
+    _unpause();
+  }
+
+  function batchMint(address to, uint256 quantity, string memory batchBaseUri) external whenNotPaused onlyRole(MINTER_ROLE) nonReentrant {
     require(to != address(0), 'Could not mint to zero address');
     require(quantity > 0 && quantity <= BATCH_SIZE, 'Invalid batch mint quantity');
 
@@ -91,7 +108,7 @@ abstract contract Carbon3LabelBase is
     _batchBaseURIs[batchId] = batchBaseUri;
   }
 
-  function batchTransfer(address to, uint256 batchId) external {
+  function batchTransfer(address to, uint256 batchId) external whenNotPaused {
     address from = _msgSender();
     require(_batch_exists(batchId), "Invalid batch to transfer");
     require(_batchOwners.get(batchId) == from, "Batch transfer from incorrect owner");
@@ -109,7 +126,7 @@ abstract contract Carbon3LabelBase is
     emit ConsecutiveTransfer(startTokenId, endTokenId, from, to);
   }
 
-  function batchBurn(uint256 batchId) external {
+  function batchBurn(uint256 batchId) external whenNotPaused {
     address from = _msgSender();
     require(_batch_exists(batchId), "Invalid batch to burn");
     require(_batchOwners.get(batchId) == from, "Batch burn from incorrect owner");
