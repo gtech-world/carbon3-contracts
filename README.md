@@ -5,9 +5,9 @@
 Cloning repository and install dependencies:
 
 ```sh
-$ git clone git@github.com:gtech-world/carbon3-sbt-contracts.git
+$ git clone git@github.com:gtech-world/carbon3-contracts.git
 
-$ cd carbon3-sbt-contracts
+$ cd carbon3-contracts
 
 $ yarn
 ```

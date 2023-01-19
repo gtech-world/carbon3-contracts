@@ -4,8 +4,9 @@ pragma solidity ^0.8.9;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlEnumerableUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/CountersUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
@@ -19,6 +20,7 @@ import "./interface/ICarbon3Label.sol";
 abstract contract Carbon3LabelBase is
   Initializable,
   ICarbon3Label,
+  ReentrancyGuardUpgradeable,
   AccessControlEnumerableUpgradeable {
   using SafeMathUpgradeable for uint256;
   using StringsUpgradeable for uint256;
@@ -61,7 +63,7 @@ abstract contract Carbon3LabelBase is
     _symbol = symbol_;
   }
 
-  function batchMint(address to, uint256 quantity, string memory batchBaseUri) external onlyRole(MINTER_ROLE) {
+  function batchMint(address to, uint256 quantity, string memory batchBaseUri) external onlyRole(MINTER_ROLE) nonReentrant {
     require(to != address(0), 'Could not mint to zero address');
     require(quantity > 0 && quantity <= BATCH_SIZE, 'Invalid batch mint quantity');
 

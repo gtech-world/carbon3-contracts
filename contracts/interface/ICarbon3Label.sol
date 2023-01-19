@@ -5,35 +5,9 @@ import "@openzeppelin/contracts-upgradeable/token/ERC721/extensions/IERC721Metad
 
 import "./IERC2309.sol";
 
-interface ICarbon3Label is IERC2309 {
-  /**
-   * @dev Returns the token collection name.
-   */
-  function name() external view returns (string memory);
+interface ICarbon3Label is IERC721MetadataUpgradeable, IERC2309 {
 
-  /**
-   * @dev Returns the token collection symbol.
-   */
-  function symbol() external view returns (string memory);
-
-  /**
-   * @dev Returns the Uniform Resource Identifier (URI) for `tokenId` token.
-   */
-  function tokenURI(uint256 tokenId) external view returns (string memory);
-
-  /**
-   * @dev Returns the number of tokens in ``owner``'s account.
-   */
-  function balanceOf(address owner) external view returns (uint256 balance);
-
-  /**
-   * @dev Returns the owner of the `tokenId` token.
-   *
-   * Requirements:
-   *
-   * - `tokenId` must exist.
-   */
-  function ownerOf(uint256 tokenId) external view returns (address owner);
+  error Unsupported();
 
   /**
    * @dev Mint a batch of tokens to specified account. Only account with MINTER_ROLE is able to perform this operation.
