@@ -51,7 +51,6 @@ contract Carbon3Label is
     override(AccessControlEnumerableUpgradeable)
     returns (bool)
   {
-    return super.supportsInterface(interfaceId)
-      || interfaceId == 0xb45a3c0e; // Interface ID for ERC5192;
+    return super.supportsInterface(interfaceId);
   }
 }

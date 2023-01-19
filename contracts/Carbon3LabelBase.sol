@@ -11,16 +11,14 @@ import "@openzeppelin/contracts-upgradeable/utils/StringsUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/structs/EnumerableMapUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/utils/math/SafeMathUpgradeable.sol";
 
-import "./interface/IERC2309.sol";
-import "./interface/IERC5192Batch.sol";
+import "./interface/ICarbon3Label.sol";
 
 /**
  * ERC721 tokens that could only be minted / transferred / burned in batches.
  */
 abstract contract Carbon3LabelBase is
   Initializable,
-  IERC2309,
-  IERC5192Batch,
+  ICarbon3Label,
   AccessControlEnumerableUpgradeable {
   using SafeMathUpgradeable for uint256;
   using StringsUpgradeable for uint256;
@@ -63,7 +61,7 @@ abstract contract Carbon3LabelBase is
     _symbol = symbol_;
   }
 
-  function batchMint(address to, uint256 quantity, string memory batchBaseUri) public onlyRole(MINTER_ROLE) {
+  function batchMint(address to, uint256 quantity, string memory batchBaseUri) external onlyRole(MINTER_ROLE) {
     require(to != address(0), 'Could not mint to zero address');
     require(quantity > 0 && quantity <= BATCH_SIZE, 'Invalid batch mint quantity');
 
@@ -91,7 +89,7 @@ abstract contract Carbon3LabelBase is
     _batchBaseURIs[batchId] = batchBaseUri;
   }
 
-  function batchTransfer(address to, uint256 batchId) public virtual {
+  function batchTransfer(address to, uint256 batchId) external {
     address from = _msgSender();
     require(_batch_exists(batchId), "Invalid batch to transfer");
     require(_batchOwners.get(batchId) == from, "Batch transfer from incorrect owner");
@@ -109,7 +107,7 @@ abstract contract Carbon3LabelBase is
     emit ConsecutiveTransfer(startTokenId, endTokenId, from, to);
   }
 
-  function batchBurn(uint256 batchId) public virtual {
+  function batchBurn(uint256 batchId) external {
     address from = _msgSender();
     require(_batch_exists(batchId), "Invalid batch to burn");
     require(_batchOwners.get(batchId) == from, "Batch burn from incorrect owner");
@@ -180,13 +178,6 @@ abstract contract Carbon3LabelBase is
 
   function _batch_exists(uint256 batchId) internal view virtual returns (bool) {
     return _batchQuantities.contains(batchId);
-  }
-
-  /**
-   * @dev All tokens are locked and non-transferrable
-   */
-  function locked(uint256) external override (IERC5192Batch) pure returns (bool) {
-    return true;
   }
 
   /**
