@@ -17,11 +17,12 @@ import "./interface/IERC5192Batch.sol";
 /**
  * ERC721 tokens that could only be minted / transferred / burned in batches.
  */
-abstract contract ERC721BatchUpgradable is
+abstract contract Carbon3LabelBase is
   Initializable,
   IERC2309,
   IERC5192Batch,
   AccessControlEnumerableUpgradeable {
+  using SafeMathUpgradeable for uint256;
   using StringsUpgradeable for uint256;
   using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToUintMap;
   using EnumerableMapUpgradeable for EnumerableMapUpgradeable.UintToAddressMap;
@@ -53,11 +54,11 @@ abstract contract ERC721BatchUpgradable is
   /// @dev batchId => batchBaseUri
   mapping(uint256 => string) internal _batchBaseURIs;
 
-  function __ERC721BatchUpgradable_init(string memory name_, string memory symbol_) internal onlyInitializing {
-    __ERC721BatchUpgradable_init_unchained(name_, symbol_);
+  function __Carbon3LabelBase_init(string memory name_, string memory symbol_) internal onlyInitializing {
+    __Carbon3LabelBase_init_unchained(name_, symbol_);
   }
 
-  function __ERC721BatchUpgradable_init_unchained(string memory name_, string memory symbol_) internal onlyInitializing {
+  function __Carbon3LabelBase_init_unchained(string memory name_, string memory symbol_) internal onlyInitializing {
     _name = name_;
     _symbol = symbol_;
   }
@@ -69,26 +70,62 @@ abstract contract ERC721BatchUpgradable is
     _batchIdCounter.increment();
     uint256 batchId = _batchIdCounter.current();
 
-    uint256 startTokenId = SafeMathUpgradeable.mul(batchId, BATCH_SIZE);
-    uint256 endTokenId = SafeMathUpgradeable.add(startTokenId, quantity - 1);
+    uint256 startTokenId = batchId.mul(BATCH_SIZE);
+    uint256 endTokenId = startTokenId.add(quantity - 1);
 
-    // Check that tokenId was not minted by `_beforeTokenTransfer` hook
     require(!_batch_exists(batchId), "Token batch already minted");
 
     _batchQuantities.set(batchId, quantity);
 
-    _totalSupply += quantity;
+    _totalSupply = _totalSupply.add(quantity);
     _batchOwners.set(batchId, to);
 
     uint256 balance = quantity;
     if (_balances.contains(to)) {
-      balance = SafeMathUpgradeable.add(balance, _balances.get(to));
+      balance = balance.add(_balances.get(to));
     }
     _balances.set(to, balance);
 
     emit ConsecutiveTransfer(startTokenId, endTokenId, address(0), to);
 
     _batchBaseURIs[batchId] = batchBaseUri;
+  }
+
+  function batchTransfer(address to, uint256 batchId) public virtual {
+    address from = _msgSender();
+    require(_batch_exists(batchId), "Invalid batch to transfer");
+    require(_batchOwners.get(batchId) == from, "Batch transfer from incorrect owner");
+    require(to != address(0), "Batch transfer to the zero address");
+
+    assert(_batchQuantities.contains(batchId));
+    uint256 quantity = _batchQuantities.get(batchId);
+    _balances.set(from, _balances.get(from).sub(quantity));
+    _balances.set(to, _balances.get(to).add(quantity));
+
+    _batchOwners.set(batchId, to);
+
+    uint256 startTokenId = batchId.mul(BATCH_SIZE);
+    uint256 endTokenId = startTokenId.add(quantity - 1);
+    emit ConsecutiveTransfer(startTokenId, endTokenId, from, to);
+  }
+
+  function batchBurn(uint256 batchId) public virtual {
+    address from = _msgSender();
+    require(_batch_exists(batchId), "Invalid batch to burn");
+    require(_batchOwners.get(batchId) == from, "Batch burn from incorrect owner");
+
+    assert(_batchQuantities.contains(batchId));
+    uint256 quantity = _batchQuantities.get(batchId);
+    _balances.set(from, _balances.get(from).sub(quantity));
+
+    _totalSupply = _totalSupply.sub(quantity);
+
+    _batchQuantities.remove(batchId);
+    _batchOwners.remove(batchId);
+
+    uint256 startTokenId = batchId.mul(BATCH_SIZE);
+    uint256 endTokenId = startTokenId.add(quantity - 1);
+    emit ConsecutiveTransfer(startTokenId, endTokenId, from, address(0));
   }
 
   function totalSupply() public view virtual returns (uint256) {
@@ -126,18 +163,18 @@ abstract contract ERC721BatchUpgradable is
     string memory baseURI = _batchBaseURIs[batchId];
     assert(bytes(baseURI).length > 0);
 
-    uint256 tokenBatchIndex = SafeMathUpgradeable.mod(tokenId, BATCH_SIZE);
+    uint256 tokenBatchIndex = tokenId.mod(BATCH_SIZE);
     return string(abi.encodePacked(baseURI, tokenBatchIndex.toString(), '.json'));
   }
 
   function _exists(uint256 tokenId) internal view virtual returns (bool, uint256) {
-    uint256 batchId = SafeMathUpgradeable.div(tokenId, BATCH_SIZE);
+    uint256 batchId = tokenId.div(BATCH_SIZE);
     if (!_batch_exists(batchId)) {
       return (false, batchId);
     }
 
     uint256 batchQuantity = _batchQuantities.get(batchId);
-    uint256 tokenBatchIndex = SafeMathUpgradeable.mod(tokenId, BATCH_SIZE);
+    uint256 tokenBatchIndex = tokenId.mod(BATCH_SIZE);
     return (tokenBatchIndex < batchQuantity, batchId);
   }
 
