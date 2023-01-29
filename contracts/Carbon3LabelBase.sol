@@ -199,6 +199,10 @@ abstract contract Carbon3LabelBase is
     return _batchQuantities.contains(batchId);
   }
 
+  function currentBatchId() public view virtual returns (uint256) {
+    return _batchIdCounter.current();
+  }
+  
   /**
    * @dev This empty reserved space is put in place to allow future versions to add new
    * variables without shifting down storage in the inheritance chain.
