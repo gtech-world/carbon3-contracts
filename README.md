@@ -1,4 +1,4 @@
-# Carbon3 SBT Contracts
+# Carbon3 Contracts
 
 ## Quick start
 

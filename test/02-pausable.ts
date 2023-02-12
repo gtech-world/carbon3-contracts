@@ -7,9 +7,9 @@ describe("Pausable work", () => {
  
   it("pause mint,transfer,burn", async () => {
     const { carbon3, Alice, Bob } = await loadFixture(deployCarbon3Fixture);
-    await carbon3.batchMint(Alice.address, 100000, "https://base.uri");
+    await carbon3.batchMint(Alice.address, 100000, "ipfs://<BASE_CID>");
     await carbon3.pause();
-    expect(carbon3.batchMint(Alice.address, 10000, "https://base.uri")).to.be.rejectedWith(
+    expect(carbon3.batchMint(Alice.address, 10000, "ipfs://<BASE_CID>")).to.be.rejectedWith(
       /Pausable: paused/,
       "Should not be able to batch mint"
     );

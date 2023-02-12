@@ -5,13 +5,13 @@ describe("Should reject on incorrect input", () => {
   it("Should reject batch mint", async () => {
     const { carbon3, Bob } = await loadFixture(deployCarbon3Fixture);
     // count > 1000000
-    expect(carbon3.batchMint(Bob.address, 1000001, "https://base.uri")).to.be.rejectedWith(
+    expect(carbon3.batchMint(Bob.address, 1000001, "ipfs://<BASE_CID>")).to.be.rejectedWith(
       "/Invalid batch mint quantity/"
     );
     // count < 0
-    expect(carbon3.batchMint(Bob.address, -1, "https://base.uri")).to.be.rejectedWith("/Invalid batch mint quantity/");
+    expect(carbon3.batchMint(Bob.address, -1, "ipfs://<BASE_CID>")).to.be.rejectedWith("/Invalid batch mint quantity/");
     // address(0)
-    expect(carbon3.batchMint(ADDRESS_0, 1000, "https://base.uri")).to.be.rejectedWith(
+    expect(carbon3.batchMint(ADDRESS_0, 1000, "ipfs://<BASE_CID>")).to.be.rejectedWith(
       "/Could not mint to zero address/"
     );
   });
