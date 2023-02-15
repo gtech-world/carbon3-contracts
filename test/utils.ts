@@ -16,6 +16,19 @@ export async function deployCarbon3Fixture() {
   return { carbon3: carbon3.connect(Alice), implAddress, Alice, Bob, Caro, Dave };
 }
 
+export async function nextBatchInfo(carbon3: Carbon3Label, quantity: number, batchBaseUri: string) {
+  const batchSize = (await carbon3.BATCH_SIZE()).toNumber();
+  const batchId = (await carbon3.currentBatchId()).toNumber() + 1;
+  return {
+    batchId,
+    batchSize,
+    batchQuantity: quantity,
+    startTokenId: batchSize * batchId,
+    endTokenId: batchSize * batchId + quantity - 1,
+    batchBaseUri
+  };
+}
+
 export async function batchMint(to: string, count: number, carbon3: Carbon3Label, baseUri: string = "ipfs://<BATCH_FOLDER_CID>") {
   const batchSize = await carbon3.BATCH_SIZE();
   const batchId = (await carbon3.currentBatchId()).add(1);

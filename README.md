@@ -40,12 +40,12 @@ To deploy to remote network
 
 ```sh
 # Use `hardhat-shorthand`:
-$ hh run scripts/deploy.ts --network [mainnet/rinkeby/goerli]
+$ hh run scripts/deploy.ts --network [mainnet/rinkeby/goerli/polygon/mumbai]
 ```
 
 To verify:
 
 ```sh
 # Use `hardhat-shorthand`:
-$ hh verify --network [mainnet/rinkeby/goerli] <address>
+$ hh verify --network [mainnet/rinkeby/goerli/polygon/mumbai] <address>
 ```

@@ -37,6 +37,7 @@ contract Carbon3Label is
   function supportsInterface(bytes4 interfaceId)
     public
     view
+    virtual
     override(IERC165Upgradeable, AccessControlEnumerableUpgradeable)
     returns (bool) {
     return

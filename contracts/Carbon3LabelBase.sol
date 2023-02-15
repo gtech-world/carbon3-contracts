@@ -80,7 +80,7 @@ abstract contract Carbon3LabelBase is
     _unpause();
   }
 
-  function batchMint(address to, uint256 quantity, string memory batchBaseUri) external whenNotPaused onlyRole(MINTER_ROLE) nonReentrant {
+  function batchMint(address to, uint256 quantity, string memory batchBaseUri) external virtual whenNotPaused onlyRole(MINTER_ROLE) nonReentrant {
     require(to != address(0), 'Could not mint to zero address');
     require(quantity > 0 && quantity <= BATCH_SIZE, 'Invalid batch mint quantity');
 
@@ -108,7 +108,7 @@ abstract contract Carbon3LabelBase is
     _batchBaseURIs[batchId] = batchBaseUri;
   }
 
-  function batchTransfer(address to, uint256 batchId) external whenNotPaused {
+  function batchTransfer(address to, uint256 batchId) external virtual whenNotPaused {
     address from = _msgSender();
     require(_batch_exists(batchId), "Invalid batch to transfer");
     require(_batchOwners.get(batchId) == from, "Batch transfer from incorrect owner");
@@ -126,7 +126,7 @@ abstract contract Carbon3LabelBase is
     emit ConsecutiveTransfer(startTokenId, endTokenId, from, to);
   }
 
-  function batchBurn(uint256 batchId) external whenNotPaused {
+  function batchBurn(uint256 batchId) external virtual whenNotPaused {
     address from = _msgSender();
     require(_batch_exists(batchId), "Invalid batch to burn");
     require(_batchOwners.get(batchId) == from, "Batch burn from incorrect owner");
@@ -181,7 +181,7 @@ abstract contract Carbon3LabelBase is
     assert(bytes(baseURI).length > 0);
 
     uint256 tokenBatchIndex = tokenId.mod(BATCH_SIZE);
-    return string(abi.encodePacked(baseURI, tokenBatchIndex.toString(), '.json'));
+    return string(abi.encodePacked(baseURI, '/', tokenBatchIndex.toString(), '.json'));
   }
 
   function _exists(uint256 tokenId) internal view virtual returns (bool, uint256) {

@@ -1,8 +1,23 @@
 import { expect } from "chai";
 import { loadFixture } from "@nomicfoundation/hardhat-network-helpers";
-import { ADDRESS_0, batchMint, deployCarbon3Fixture } from "./utils";
-describe("Should reject on incorrect input", () => {
-  it("Should reject batch mint", async () => {
+import { ADDRESS_0, batchMint, deployCarbon3Fixture, nextBatchInfo } from "./utils";
+
+describe("Invalid scenarios", () => {
+
+  it("Unsupported operations", async () => {
+    const { carbon3, Alice, Bob } = await loadFixture(deployCarbon3Fixture);
+
+    const batch1 = await nextBatchInfo(carbon3, 100, 'ipfs://<BATCH_FOLDER_CID_1>');
+    await expect(carbon3.connect(Alice).batchMint(Bob.address, batch1.batchQuantity, batch1.batchBaseUri))
+      .to.emit(carbon3, "ConsecutiveTransfer")
+      .withArgs(batch1.startTokenId, batch1.endTokenId, ADDRESS_0, Bob.address);
+
+    const tokenId = batch1.endTokenId;
+    await expect(carbon3.connect(Bob).transferFrom(Bob.address, Alice.address, tokenId)).to.be.rejectedWith(/Unsupported/);
+    await expect(carbon3.connect(Bob).approve(Alice.address, tokenId)).to.be.rejectedWith(/Unsupported/);
+  });
+  
+  it("Batch mint", async () => {
     const { carbon3, Bob } = await loadFixture(deployCarbon3Fixture);
     // count > 1000000
     expect(carbon3.batchMint(Bob.address, 1000001, "ipfs://<BASE_CID>")).to.be.rejectedWith(
@@ -16,7 +31,7 @@ describe("Should reject on incorrect input", () => {
     );
   });
 
-  it("Should reject batch transfer", async () => {
+  it("Batch transfer", async () => {
     const { carbon3, Bob, Alice, Dave } = await loadFixture(deployCarbon3Fixture);
     const { batchId } = await batchMint(Bob.address, 100000, carbon3);
 
@@ -37,7 +52,7 @@ describe("Should reject on incorrect input", () => {
     );
   });
 
-  it("Should reject batch burn", async () => {
+  it("Batch burn", async () => {
     const { carbon3, Bob, Alice } = await loadFixture(deployCarbon3Fixture);
     const { batchId } = await batchMint(Bob.address, 100000, carbon3);
     // batchId not exists
@@ -51,4 +66,5 @@ describe("Should reject on incorrect input", () => {
       "incorrect owner"
     );
   });
+
 });

@@ -15,13 +15,15 @@ const chainIds = {
   mainnet: 1,
   rinkeby: 4,
   goerli: 5,
+  polygon: 137,
+  mumbai: 80001
 };
 
 // Ensure that we have all the environment variables we need.
 const privateKey: string = process.env.PRIVATE_KEY || "";
 const infuraKey: string = process.env.INFURA_KEY || "";
 
-function createTestnetConfig(network: keyof typeof chainIds): NetworkUserConfig {
+function createNetworkConfig(network: keyof typeof chainIds): NetworkUserConfig {
   if (!infuraKey) {
     throw new Error("Missing INFURA_KEY");
   }
@@ -36,6 +38,12 @@ function createTestnetConfig(network: keyof typeof chainIds): NetworkUserConfig 
       break;
     case "goerli":
       nodeUrl = `https://goerli.infura.io/v3/${infuraKey}`;
+      break;
+    case "polygon":
+      nodeUrl = `https://polygon-mainnet.infura.io/v3/${infuraKey}`;
+      break;
+    case "mumbai":
+      nodeUrl = `https://polygon-mumbai.infura.io/v3/${infuraKey}`;
       break;
   }
 
@@ -82,6 +90,8 @@ const config: HardhatUserConfig = {
       mainnet: process.env.ETHERSCAN_KEY || '',
       rinkeby: process.env.ETHERSCAN_KEY || '',
       goerli: process.env.ETHERSCAN_KEY || '',
+      polygon: process.env.POLYGONSCAN_KEY || '',
+      polygonMumbai: process.env.POLYGONSCAN_KEY || ''
     },
   },
   gasReporter: {
@@ -93,9 +103,11 @@ const config: HardhatUserConfig = {
 
 if (privateKey) {
   config.networks = {
-    mainnet: createTestnetConfig("mainnet"),
-    goerli: createTestnetConfig("goerli"),
-    rinkeby: createTestnetConfig("rinkeby"),
+    mainnet: createNetworkConfig("mainnet"),
+    goerli: createNetworkConfig("goerli"),
+    rinkeby: createNetworkConfig("rinkeby"),
+    polygon: createNetworkConfig("polygon"),
+    mumbai: createNetworkConfig("mumbai"),
   };
 }
 
