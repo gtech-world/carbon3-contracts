@@ -16,7 +16,8 @@ const chainIds = {
   rinkeby: 4,
   goerli: 5,
   polygon: 137,
-  mumbai: 80001
+  mumbai: 80001,
+  greenchain: 5314,
 };
 
 // Ensure that we have all the environment variables we need.
@@ -28,6 +29,18 @@ function createNetworkConfig(network: keyof typeof chainIds): NetworkUserConfig 
     throw new Error("Missing INFURA_KEY");
   }
 
+  if(network == 'greenchain'){
+    // const gasPrice = 800000000;
+    // console.info('gasPrice:', gasPrice)
+    return {
+      chainId: chainIds['greenchain'],
+      url: 'https://rpc.gtech-cn.co/',
+      accounts: [`${privateKey}`],
+      gasMultiplier: 1.2,
+      gasPrice: 1000000007,
+      initialBaseFeePerGas: 1000000000,
+    }
+  }
   let nodeUrl;
   switch (network) {
     case "mainnet":
@@ -91,8 +104,19 @@ const config: HardhatUserConfig = {
       rinkeby: process.env.ETHERSCAN_KEY || '',
       goerli: process.env.ETHERSCAN_KEY || '',
       polygon: process.env.POLYGONSCAN_KEY || '',
-      polygonMumbai: process.env.POLYGONSCAN_KEY || ''
+      polygonMumbai: process.env.POLYGONSCAN_KEY || '',
+      greenchain: "-",
     },
+    customChains: [
+      {
+        network: 'greenchain',
+        chainId: chainIds['greenchain'],
+        urls: {
+          apiURL: "https://explorer.gtech-cn.co/api",
+          browserURL: "https://explorer.gtech-cn.co/"
+        }
+      }
+    ]
   },
   gasReporter: {
     coinmarketcap: process.env.COINMARKETCAP_KEY,
@@ -108,6 +132,7 @@ if (privateKey) {
     rinkeby: createNetworkConfig("rinkeby"),
     polygon: createNetworkConfig("polygon"),
     mumbai: createNetworkConfig("mumbai"),
+    greenchain: createNetworkConfig("greenchain")
   };
 }
 
