@@ -7,7 +7,7 @@ async function main() {
   const c3 = Carbon3Label__factory.connect(address, signer);
   const to = "0x90921CA7B23c327Ab9f1e0331806149a427299a3";
   const mintRole = await c3.MINTER_ROLE();
-  const tx = await c3.grantRole(mintRole, to, { nonce: 20, gasLimit: 30000000 });
+  const tx = await c3.grantRole(mintRole, to);
   console.info("send:tx:", tx.hash);
   await tx.wait();
   const hasRole = await c3.hasRole(mintRole, to);
