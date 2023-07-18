@@ -4,6 +4,7 @@ import "hardhat-abi-exporter";
 import "hardhat-gas-reporter"
 import "@nomicfoundation/hardhat-toolbox";
 import '@openzeppelin/hardhat-upgrades';
+import "@nomiclabs/hardhat-etherscan";
 import { HardhatUserConfig } from "hardhat/config";
 import { NetworkUserConfig } from "hardhat/types";
 
@@ -37,7 +38,7 @@ function createNetworkConfig(network: keyof typeof chainIds): NetworkUserConfig 
       url: 'https://rpc.gtech-cn.co/',
       accounts: [`${privateKey}`],
       gasMultiplier: 1.2,
-      gasPrice: 1000000000,
+      gasPrice: 1500000000,
       allowUnlimitedContractSize: true,
       loggingEnabled: true,
       initialBaseFeePerGas: 1000000007,
