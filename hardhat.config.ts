@@ -36,9 +36,11 @@ function createNetworkConfig(network: keyof typeof chainIds): NetworkUserConfig 
       chainId: chainIds['greenchain'],
       url: 'https://rpc.gtech-cn.co/',
       accounts: [`${privateKey}`],
-      gasMultiplier: 1.2,
-      gasPrice: 1000000007,
-      initialBaseFeePerGas: 1000000000,
+      gasMultiplier: 2,
+      gasPrice: 3000000000,
+      allowUnlimitedContractSize: true,
+      loggingEnabled: true,
+      initialBaseFeePerGas: 1000000007,
     }
   }
   let nodeUrl;
@@ -98,6 +100,7 @@ const config: HardhatUserConfig = {
     outDir: "typechain",
     target: "ethers-v5",
   },
+  
   etherscan: {
     apiKey: {
       mainnet: process.env.ETHERSCAN_KEY || '',
